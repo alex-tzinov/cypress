@@ -34,6 +34,11 @@ const isGitlab = () => {
   return process.env.GITLAB_CI || (process.env.CI_SERVER_NAME && /^GitLab/.test(process.env.CI_SERVER_NAME))
 }
 
+const isGoogleCloudBuild = () => {
+  return process.env.PROJECT_ID ||
+    process.env.BUILD_ID
+}
+
 const isJenkins = () => {
   return process.env.JENKINS_URL ||
     process.env.JENKINS_HOME ||
@@ -58,6 +63,7 @@ const CI_PROVIDERS = {
   'codeshipPro': isCodeshipPro,
   'drone': 'DRONE',
   'gitlab': isGitlab,
+  'googleclouldbuild': isGoogleCloudBuild,
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'shippable': 'SHIPPABLE',
@@ -168,6 +174,17 @@ const _providerCiParams = () => {
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
+    //# for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    ]),
+    googlecloudbuild: extract([
+      'PROJECT_ID',
+      'BUILD_ID',
+      'COMMIT_SHA',
+      'SHORT_SHA',
+      'REPO_NAME',
+      'BRANCH_NAME',
+      'TAG_NAME',
+      'REVISION_ID',
     //# for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     jenkins: extract([
@@ -323,6 +340,15 @@ const _providerCommitParams = function () {
       message: env.CI_COMMIT_MESSAGE,
       authorName: env.GITLAB_USER_NAME,
       authorEmail: env.GITLAB_USER_EMAIL,
+      // remoteOrigin: ???
+      // defaultBranch: ???
+    },
+    googlecloudbuild: {
+      sha: env.COMMIT_SHA,
+      branch: env.BRANCH_NAME,
+      // message: env.CI_COMMIT_MESSAGE,
+      // authorName: env.GITLAB_USER_NAME,
+      // authorEmail: env.GITLAB_USER_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
     },
